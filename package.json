@@ -1,0 +1,30 @@
+{
+  "name": "montprofond",
+  "version": "0.1.0",
+  "description": "Expérience interactive textuelle basée sur la technologie Discord.",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m-becu/montprofond.git"
+  },
+  "author": "Anorak",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/m-becu/montprofond/issues"
+  },
+  "homepage": "https://github.com/m-becu/montprofond#readme",
+  "devDependencies": {
+    "jest": "^28.1.0",
+    "nodemon": "^2.0.16"
+  },
+  "dependencies": {
+    "discord-api-types": "^0.32.1",
+    "@discordjs/builders": "^0.13.0",
+    "@discordjs/rest": "^0.4.1",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0"
+  }
+}
