@@ -13,6 +13,7 @@ require('dotenv').config();
 
 // Dependencies
 const fs = require('node:fs');
+const { ECS } = require('./src/system');
 
 // Command dependencies
 const { REST } = require('@discordjs/rest');
@@ -26,6 +27,9 @@ const gandalf = new Client({
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
 });
+
+// Game logic
+var game = new ECS.Game();
 
 // Handle commands
 gandalf.commands = new Collection();
@@ -52,7 +56,7 @@ gandalf.on('interactionCreate', async interaction => {
 
     if (!command) return;
     try {
-        await command.execute(interaction);
+        await command.execute(game, interaction);
     } catch (e) {
         console.error(e);
         await interaction.reply({
@@ -62,13 +66,42 @@ gandalf.on('interactionCreate', async interaction => {
     }
 });
 
-// Login Gandlaf to Discord
-gandalf.login(process.env.TOKEN).then(() => {
+// Handle channels
+var gameData = require('./src/data/game.json');
+var undermountain;
+var createdChannels = [];
+
+// Login Gandalf to Discord
+gandalf.login(process.env.TOKEN).then(async () => {
+    undermountain = await gandalf.guilds.cache.get(process.env.GUILD_ID);
+
+    gameData.areas.forEach(async (area) => {
+        let category = await undermountain.channels.create(
+            area.displayName,
+            { type: 'GUILD_CATEGORY' }
+        );
+        createdChannels.push(category.id);
+
+        const rooms = gameData.rooms.filter(r => r.area === area.name);
+        rooms.forEach(async (room) => {
+            let channel = await category.createChannel(room.name);
+            room.id = channel.id;
+
+            createdChannels.push(channel.id);
+            
+            game.rooms[room.name].channel = channel;
+        });
+    });
+
     console.log("🧙 Gandalf is ready!");
 }).catch(console.error);
 
 // Clean node process exit
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
+    for (const channelID of createdChannels) {
+        const channel = await undermountain.channels.fetch(channelID);
+        await channel.delete();
+    }
     console.log("👋 Goodbye!");
     process.exit(1);
 });
