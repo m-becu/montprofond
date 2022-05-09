@@ -90,6 +90,7 @@ gandalf.login(process.env.TOKEN).then(async () => {
             createdChannels.push(channel.id);
             
             game.rooms[room.name].channel = channel;
+            game.channels[channel.id] = room;
         });
     });
 
@@ -98,6 +99,7 @@ gandalf.login(process.env.TOKEN).then(async () => {
 
 // Clean node process exit
 process.on('SIGINT', async () => {
+    console.log("💤 Ending game...");
     for (const channelID of createdChannels) {
         const channel = await undermountain.channels.fetch(channelID);
         await channel.delete();

@@ -5,6 +5,8 @@ var ECS = {};
 // G A M E
 ECS.Game = function game() {
 
+    this.players = {};
+    this.channels = {};
     this.entities = {};
     this.rooms = {};
     this.areas = {};
@@ -28,6 +30,7 @@ ECS.Game.prototype.newPlayer = function newPlayer(name, memberData) {
     playerEntity.addComponent(new ECS.Components.Location());
 
     this.entities[playerEntity.id] = playerEntity;
+    this.players[memberData.id] = playerEntity;
     return playerEntity;
 };
 
@@ -46,8 +49,8 @@ ECS.Game.prototype.newNPC = function newNPC(npcData) {
     return entity;
 };
 
-ECS.Game.prototype.newRoom = function newRoom(roomData, discordChannel) {
-    let room = new Room(roomData, discordChannel);
+ECS.Game.prototype.newRoom = function newRoom(roomData) {
+    let room = new Room(roomData);
     this.rooms[room.name] = room;
     return room;
 };
