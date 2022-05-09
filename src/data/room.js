@@ -9,7 +9,7 @@ class Room {
         this.channel = null;
         this.entities = {};
     };
-    trigger(triggerName, entity) {
+    async trigger(triggerName, entity) {
         switch (triggerName) {
             case 'OnEnter':
                 this.entities[entity.id] = entity;
@@ -17,6 +17,9 @@ class Room {
                     this.channel.permissionOverwrites.create(entity.components.member.value, { 
                         VIEW_CHANNEL: true 
                     });
+                };
+                if (entity.hasComponent('name') && this.channel) {
+                    await this.channel.send(`➡ ${entity.components.name.value} est entré.`);
                 };
                 break;
         
@@ -26,6 +29,9 @@ class Room {
                     this.channel.permissionOverwrites.create(entity.components.member.value, { 
                         VIEW_CHANNEL: false 
                     });
+                };
+                if (entity.hasComponent('name') && this.channel) {
+                    await this.channel.send(`➡ ${entity.components.name.value} est parti.`);
                 };
                 break;
 
