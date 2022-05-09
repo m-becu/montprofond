@@ -1,0 +1,85 @@
+{
+    "players": [],
+    "areas": [
+        {
+            "id": 0,
+            "name": "strate-0",
+            "displayName": "🛕 Eauprofonde"
+        },
+        {
+            "id": 1,
+            "name": "strate-1",
+            "displayName": "🏰 Strate du Donjon"
+        }
+    ],
+    "rooms": [
+        {
+            "id": 0,
+            "name": "le-portail-béant",
+            "area": "strate-0",
+            "desc": "L'auberge du portail béant est le point de passage privilégié par les aventuriers pour accèder au donjon de Montprofond. D'autres aventuriers passent également par ici pour s'équiper et recueillir des informations avant de descendre.",
+            "exits": [
+                {
+                    "name": "Puit vers Montprofond",
+                    "dest": "puit-d-entree",
+                    "desc": "Dans le sous-sol de l'auberge, des hommes de main de Durnand surveille un profond puit, muni d'un monte-charge."
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "name": "puit-d-entree",
+            "area": "strate-1",
+            "desc": "Au fond du puits d'entrée du Portail Béant se trouve une salle carrée de douze mètres de côté. Le sol est recouvert d'une fine couche de sable et des boucliers cabossés et rouillés ornent les murs maculés de graffitis.",
+            "exits": [
+                {
+                    "name": "Tunnel sud",
+                    "dest": "salle-des-piliers", 
+                    "desc": "La seule sortie semble être un tunnel qui s'étend vers le sud avant de tourner vers l'ouest."
+                },
+                {
+                    "name": "Porte secrète",
+                    "dest": "couloir-45",
+                    "desc": "Une porte secrète à sens unique dans le mur nord ne peut pas être ouverte de ce côté par des moyens conventionels. Vous remarquez également un trou de trois centimètres de diamètre qui la traverse à une hauteur d'un mètre cinquante.",
+                    "locked": {
+                        "key": null,
+                        "lockpick": -1,
+                        "magic": false
+                    },
+                    "find": {
+                        "carac": "perception",
+                        "dd": 12
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "salle-des-piliers",
+            "area": "strate-1",
+            "desc": "A l'extrémité ouest d'un couloir de six mètres de large, un escalier descend de trois mètres vers une salle remplie de colonnes. Un escalier similaire descend dans la pièce depuis des couloirs de trois mètres de large qui s'étendent vers le nord, l'ouest et le sud. Autour de vous, des renfoncements en forme de porte sont disséminés tous les trois mètres, chacun contenant un bas-relief représentant un démon différent. Le squelette d'une étrange créature est étendu par terre, avec l'un de ses bras pointé en direction d'un bas-relief.",
+            "exits": []
+        },
+        {
+            "id": 3,
+            "name": "piece-inclinee",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        },
+        {
+            "id": 4,
+            "name": "epee-en-main",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        },
+        {
+            "id": 5,
+            "name": "repere-du-grell",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        }
+    ]
+}
