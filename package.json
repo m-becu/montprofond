@@ -17,13 +17,14 @@
   },
   "homepage": "https://github.com/m-becu/montprofond#readme",
   "devDependencies": {
+    "@types/jest": "^27.5.0",
     "jest": "^28.1.0",
     "nodemon": "^2.0.16"
   },
   "dependencies": {
-    "discord-api-types": "^0.32.1",
     "@discordjs/builders": "^0.13.0",
     "@discordjs/rest": "^0.4.1",
+    "discord-api-types": "^0.32.1",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0"
   }
