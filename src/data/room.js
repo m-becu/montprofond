@@ -28,9 +28,11 @@ class Room {
 
                 } catch (e) { console.error(e); }
 
-                if (entity.hasComponent('member') && this.channel) {
-                    entity.components.member.value.createDM().then((channel) => channel.send({ embeds: [embedMessage] })).catch(console.error);
-                    this.channel.permissionOverwrites.create(entity.components.member.value, { 
+                if (entity.hasComponent('player') && this.channel) {
+
+                    // TODO: Send message to user
+
+                    this.channel.permissionOverwrites.create(entity.components.player.value, { 
                         VIEW_CHANNEL: true 
                     });
                 };
@@ -43,8 +45,8 @@ class Room {
         
             case 'OnLeave':
                 delete this.entities[entity.id];
-                if (entity.hasComponent('member') && this.channel) {
-                    this.channel.permissionOverwrites.create(entity.components.member.value, { 
+                if (entity.hasComponent('player') && this.channel) {
+                    this.channel.permissionOverwrites.create(entity.components.player.value, { 
                         VIEW_CHANNEL: null 
                     });
                 };

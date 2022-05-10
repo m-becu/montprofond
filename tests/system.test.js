@@ -56,7 +56,7 @@ describe('the entity component system', () => {
     });
 
     it('can create a new player entity', () => {
-        expect(player.components.player.uid).toBe(0);
+        expect(player.components.player.value).toBeDefined();
         expect(game.entities[player.id]).toEqual(player);
     });
 
