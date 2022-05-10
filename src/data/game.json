@@ -16,6 +16,7 @@
         {
             "id": 0,
             "name": "le-portail-béant",
+            "displayName": "Le Portail Béant",
             "area": "strate-0",
             "desc": "L'auberge du portail béant est le point de passage privilégié par les aventuriers pour accèder au donjon de Montprofond. D'autres aventuriers passent également par ici pour s'équiper et recueillir des informations avant de descendre.",
             "exits": [
@@ -29,6 +30,7 @@
         {
             "id": 1,
             "name": "puit-d-entree",
+            "displayName": "Puit d'Entrée",
             "area": "strate-1",
             "desc": "Au fond du puits d'entrée du Portail Béant se trouve une salle carrée de douze mètres de côté. Le sol est recouvert d'une fine couche de sable et des boucliers cabossés et rouillés ornent les murs maculés de graffitis.",
             "exits": [
@@ -56,6 +58,7 @@
         {
             "id": 2,
             "name": "salle-des-piliers",
+            "displayName": "Salle des Piliers",
             "area": "strate-1",
             "desc": "A l'extrémité ouest d'un couloir de six mètres de large, un escalier descend de trois mètres vers une salle remplie de colonnes. Un escalier similaire descend dans la pièce depuis des couloirs de trois mètres de large qui s'étendent vers le nord, l'ouest et le sud. Autour de vous, des renfoncements en forme de porte sont disséminés tous les trois mètres, chacun contenant un bas-relief représentant un démon différent. Le squelette d'une étrange créature est étendu par terre, avec l'un de ses bras pointé en direction d'un bas-relief.",
             "exits": []
@@ -63,6 +66,7 @@
         {
             "id": 3,
             "name": "piece-inclinee",
+            "displayName": "Pièce inclinée",
             "area": "strate-1",
             "desc": "",
             "exits": []
@@ -70,6 +74,7 @@
         {
             "id": 4,
             "name": "epee-en-main",
+            "displayName": "Epée en main",
             "area": "strate-1",
             "desc": "",
             "exits": []
@@ -77,6 +82,7 @@
         {
             "id": 5,
             "name": "repere-du-grell",
+            "displayName": "Le Répère du Grell",
             "area": "strate-1",
             "desc": "",
             "exits": []
