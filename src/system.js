@@ -31,6 +31,7 @@ ECS.Game.prototype.newPlayer = function newPlayer(name, memberData) {
 
     this.entities[playerEntity.id] = playerEntity;
     this.players[memberData.id] = playerEntity;
+
     return playerEntity;
 };
 
@@ -121,10 +122,9 @@ ECS.Components.Name = function name(value) {
 }
 ECS.Components.Name.prototype.name = 'name';
 
-ECS.Components.Player = function player({ id, displayName }) {
-    this.uid = id || 0;
-    this.username = displayName || 'Joueur';
-
+ECS.Components.Player = function player(value) {
+    if (!value) return;
+    this.value = value;
     return this;
 };
 ECS.Components.Player.prototype.name = 'player';
@@ -134,14 +134,6 @@ ECS.Components.Location = function location(roomName) {
     return this;
 };
 ECS.Components.Location.prototype.name = 'location';
-
-ECS.Components.Member = function member(value) {
-    if (!value) return;
-
-    this.value = value;
-    return this;
-};
-ECS.Components.Member.prototype.name = 'member';
 
 // S Y S T E M S
 ECS.Systems = {};
