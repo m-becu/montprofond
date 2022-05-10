@@ -12,8 +12,10 @@ class Room {
         this.channel = null;
         this.entities = {};
     };
+    
     async trigger(triggerName, entity) {
         switch (triggerName) {
+
             case 'OnEnter':
                 this.entities[entity.id] = entity;
                 
@@ -30,7 +32,34 @@ class Room {
 
                 if (entity.hasComponent('player') && this.channel) {
 
-                    // TODO: Send message to user
+                    let guildMember = entity.components.player.value; 
+
+                    try {
+                        await guildMember.user.createDM();
+                        let dm = await guildMember.user.dmChannel;
+                        dm.messages.fetch()
+                            .then(async messages => {
+                                let sentMessages = messages.filter(m => m.author.id === process.env.CLIENT_ID);
+                                if (sentMessages.size === 0) {
+                                    // console.log("Send a new message");
+                                    await dm.send({ embeds: [embedMessage] });
+
+                                } else if (sentMessages.size === 1) {
+                                    // console.log("Modify last message");
+                                    await sentMessages.at(0).edit({ embeds: [embedMessage] });
+
+                                } else if (sentMessages.size > 1) {
+                                    // console.log("Remove all messages and send a new one");
+                                    for (const [k, sent] of sentMessages) {
+                                        await sent.delete();
+                                    };
+                                    await dm.send({ embeds: [embedMessage] });
+                                };
+                            })
+                            .catch(console.error);
+                    } catch (e) {
+                        console.error(e);
+                    }
 
                     this.channel.permissionOverwrites.create(entity.components.player.value, { 
                         VIEW_CHANNEL: true 
@@ -45,20 +74,25 @@ class Room {
         
             case 'OnLeave':
                 delete this.entities[entity.id];
+
                 if (entity.hasComponent('player') && this.channel) {
                     this.channel.permissionOverwrites.create(entity.components.player.value, { 
                         VIEW_CHANNEL: null 
                     });
                 };
+
                 if (entity.hasComponent('name') && this.channel) {
                     await this.channel.send(`➡ ${entity.components.name.value} est parti.`);
                 };
+
                 break;
 
             default:
                 break;
+     
         };
     };
+
     generateOccupantsString(list) {
         list.sort(function (a, b) {
             let nameA = a.components.name.value.toLowerCase();
