@@ -10,10 +10,8 @@ module.exports = {
             .setRequired(true)),
 
     async execute(game, interaction) {
-        await interaction.member.roles.add('973006750393454602');
-
-        let playerEntity = game.newPlayer(interaction.options.get('name').value, interaction.member);
-        playerEntity.addComponent(new ECS.Components.Member(interaction.member));
+        let playerEntity = game.newPlayer(interaction.options.get('name').value, interaction.member);    
+        await playerEntity.components.player.value.roles.add('973006750393454602');
 
         game.moveEntity(playerEntity, 'le-portail-béant');
 
