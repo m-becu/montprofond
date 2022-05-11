@@ -10,10 +10,12 @@ module.exports = {
             .setRequired(true)),
 
     async execute(game, interaction) {
-        let playerEntity = game.newPlayer(interaction.options.get('name').value, interaction.member);    
-        await playerEntity.components.player.value.roles.add('973006750393454602');
+        let playerEntity;
 
-        game.moveEntity(playerEntity, 'le-portail-béant');
+        playerEntity = await game.newPlayer(interaction.options.get('name').value, interaction.member);
+        playerEntity = await game.moveEntity(playerEntity, 'le-portail-béant');
+
+        await playerEntity.components.player.value.roles.add('973006750393454602');
 
         interaction.reply({
             content: '✅ Enregistrement du personnage réussi!',
