@@ -1,6 +1,5 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
-
 class Room {
+
     constructor(roomData) {
         const { id, name, displayName, area, desc, exits, actions } = roomData;
         this.id = id;
@@ -13,93 +12,59 @@ class Room {
         this.channel = null;
         this.entities = {};
     };
-    
-    // TODO: Refactor
-    async trigger(triggerName, entity) {
-        switch (triggerName) {
 
-            case 'OnEnter':
-                this.entities[entity.id] = entity;
-
-                if (entity.hasComponent('player') && this.channel) {
-
-                    let guildMember = entity.components.player.value; 
-                    let embedMessage;
-
-                    try {
-
-                        // Print occupants to player
-                        let listOfOccupants = [];
-                        Object.entries(this.entities).forEach(([k, e]) => {
-                            if (e.hasComponent('name') && e !== entity) listOfOccupants.push(e);
-                        });
-                        let occupantsString = this.generateOccupantsString(listOfOccupants);
-
-                        // Print exits to player
-                        let listOfExits = [];
-                        this.exits.forEach(e => {
-                            if (e.hidden) return;
-                            listOfExits.push(e);
-                        });
-                        let exitsString = this.generateExitsString(listOfExits);
-                        
-                        // Create embed message
-                        embedMessage = new MessageEmbed().setTitle(this.displayName).setDescription(this.desc).setColor('#1F8B4C').addField("Occupants", occupantsString).addField("Sorties", exitsString);
-
-                        var messageToSend = { embeds: [embedMessage], components: [] };
-
-                        if (this.actions) messageToSend.components.push(this.generateActionButtons());
-                        if (this.exits.length > 0) {
-                            
-                            messageToSend.components.push(this.generateExitsButtons());
-                        };
-
-                        await guildMember.user.createDM();
-                        let dm = await guildMember.user.dmChannel;
-                        dm.messages.fetch()
-                            .then(async messages => {
-                                let sentMessages = messages.filter(m => m.author.id === process.env.CLIENT_ID);
-                                for (const [k, sent] of sentMessages) {
-                                    await sent.delete();
-                                };
-                                await dm.send(messageToSend);
-                            })
-                            .catch(console.error);
-                    } catch (e) {
-                        console.error(e);
-                    }
-
-                    this.channel.permissionOverwrites.create(entity.components.player.value, { 
-                        VIEW_CHANNEL: true 
-                    });
-                };
-
-                if (entity.hasComponent('name') && this.channel) {
-                    await this.channel.send(`➡ ${entity.components.name.value} est entré.`);
-                };
-
-                break;
-        
-            case 'OnLeave':
-                delete this.entities[entity.id];
-
-                if (entity.hasComponent('player') && this.channel) {
-                    this.channel.permissionOverwrites.create(entity.components.player.value, { 
-                        VIEW_CHANNEL: null 
-                    });
-                };
-
-                if (entity.hasComponent('name') && this.channel) {
-                    await this.channel.send(`➡ ${entity.components.name.value} est parti.`);
-                };
-
-                break;
-
-            default:
-                break;
-     
+    async enter(entity) {
+        this.entities[entity.id] = entity;
+        if (entity.hasComponent('name') && this.channel) {
+            await this.channel.send(`➡ ${entity.components.name.value} est entré.`);
         };
+        if (entity.hasComponent('player') && this.channel) {
+            this.channel.permissionOverwrites.create(entity.components.player.value, { 
+                VIEW_CHANNEL: true 
+            });
+        };
+        this.trigger('OnEnter');
+        return this;
     };
+
+    async leave(entity) {
+        delete this.entities[entity.id];
+        if (entity.hasComponent('name') && this.channel) {
+            await this.channel.send(`➡ ${entity.components.name.value} est parti.`);
+        };
+        if (entity.hasComponent('player') && this.channel) {
+            this.channel.permissionOverwrites.create(entity.components.player.value, { 
+                VIEW_CHANNEL: null 
+            });
+        };
+        this.trigger('OnLeave');
+        return this;
+    };
+
+    describeTo(entity) {
+
+        // Print occupants
+        let listOfOccupants = [];
+        Object.entries(this.entities).forEach(([k, e]) => {
+            if (e.hasComponent('name') && e !== entity) listOfOccupants.push(e);
+        });
+
+        // Print exits
+        let listOfExits = [];
+        this.exits.forEach(e => {
+            if (e.hidden) return;
+            listOfExits.push(e);
+        });
+
+        // Generate description object
+        return {
+            occupants: this.generateOccupantsString(listOfOccupants),
+            exits: this.generateExitsString(listOfExits),
+        };
+
+    };
+    
+    trigger(triggerName) {};
 
     generateOccupantsString(list) {
         list.sort(function (a, b) {
@@ -138,35 +103,6 @@ class Room {
         
         return exitsString === "" ? "Il ne semble n'y avoir aucune sortie à cette pièce." : list.length > 1 ? `Il y a différentes sorties dans cette pièce: ${exitsString}.` : `La seule sortie semble être ${exitsString}.`;
     };
-
-    generateActionButtons() {
-        // Room specific actions
-        let buttons = [];
-        this.actions.forEach(a => {
-            const button = new MessageButton()
-                .setCustomId(`action|${this.name}|${a.id}`)
-                .setLabel(a.name)
-                .setStyle('SECONDARY')
-            buttons.push(button);
-        });
-
-        return new MessageActionRow().addComponents(buttons);
-    };
-
-    generateExitsButtons() {
-        // Room specific exits
-        let buttons = [];
-        this.exits.forEach(a => {
-            if (a.hidden) return;
-            const button = new MessageButton()
-                .setCustomId(`exit|${a.dest}`)
-                .setLabel(a.name)
-                .setStyle('PRIMARY')
-            buttons.push(button);
-        });
-
-        return new MessageActionRow().addComponents(buttons);
-    }
 
 };
 

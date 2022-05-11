@@ -1,5 +1,7 @@
 const { Room } = require("./data/room");
 
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+
 var ECS = {};
 
 // G A M E
@@ -27,7 +29,7 @@ ECS.Game.prototype.newPlayer = function newPlayer(name, memberData) {
     
     playerEntity.addComponent(new ECS.Components.Name(name));
     playerEntity.addComponent(new ECS.Components.Player(memberData));
-    playerEntity.addComponent(new ECS.Components.Location());
+    playerEntity.addComponent(new ECS.Components.Location(this.rooms['limbes']));
 
     this.entities[playerEntity.id] = playerEntity;
     this.players[memberData.id] = playerEntity;
@@ -56,16 +58,20 @@ ECS.Game.prototype.newRoom = function newRoom(roomData) {
     return room;
 };
 
-ECS.Game.prototype.moveEntity = function moveEntity(entity, location) {
-    if (entity.hasComponent('location') && this.rooms[location]) {
-
-        let previousRoom = entity.components.location.room;
-        previousRoom.trigger('OnLeave', entity);
-
-        let nextRoom = this.rooms[location]
-        nextRoom.trigger('OnEnter', entity);
+ECS.Game.prototype.moveEntity = async function moveEntity(entity, location) {
+    if (!this.rooms[location]) return entity;
+    
+    if (entity.hasComponent('player')) {
+        let entityMovement = new ECS.Systems.Movement(entity);
+        let entityNarration = new ECS.Systems.Narration(entity);
         
-        entity.components.location.room = nextRoom;
+        let roomDescription = entityNarration.describeRoom(this.rooms[location]);
+
+        try {
+            entityMovement.moveEntity(this.rooms[location]);
+            entityNarration.whisperMessage(roomDescription);
+
+        } catch (e) { console.error(e); }
     };
     return entity;
 };
@@ -119,7 +125,7 @@ ECS.Components = {};
 ECS.Components.Name = function name(value) {
     this.value = value || 'Inconnu';
     return this;
-}
+};
 ECS.Components.Name.prototype.name = 'name';
 
 ECS.Components.Player = function player(value) {
@@ -129,13 +135,98 @@ ECS.Components.Player = function player(value) {
 };
 ECS.Components.Player.prototype.name = 'player';
 
-ECS.Components.Location = function location(roomName) {
-    this.room = roomName || new Room({ id: -1, name: 'limbes' });
+ECS.Components.Location = function location(room) {
+    this.room = room || new Room({ id: -1, name: 'limbes' });
     return this;
 };
 ECS.Components.Location.prototype.name = 'location';
 
 // S Y S T E M S
 ECS.Systems = {};
+
+ECS.Systems.Movement = function Movement(entity) {
+    this.entity = entity;
+    return this;
+};
+
+ECS.Systems.Movement.prototype.moveEntity = async function moveEntity(destination) {
+    if (this.entity.hasComponent('location')) {
+        await this.entity.components.location.room.leave(this.entity);
+        this.entity.components.location.room = await destination.enter(this.entity);
+    };
+    return this.entity;
+};
+
+ECS.Systems.Narration = function Narration(entity) {
+    this.entity = entity;
+};
+
+ECS.Systems.Narration.prototype.whisperMessage = async function whisperMessage(message) {
+    // Verify that entity is player
+    if (!this.entity.hasComponent('player')) return;
+    let user = this.entity.components.player.value.user;
+
+    await user.createDM();
+    let dm = await user.dmChannel;
+    dm.messages.fetch()
+        .then(async messages => {
+            let sentMessages = messages.filter(m => m.author.id === process.env.CLIENT_ID);
+            for (const [k, sent] of sentMessages) {
+                await sent.delete();
+            };
+            await dm.send(message);
+        })
+        .catch(console.error);
+};
+
+ECS.Systems.Narration.prototype.describeRoom = function describeRoom(room) {
+    
+    var messageToSend = { embeds: [], components: [] };
+
+    try {
+
+        const { occupants, exits } = room.describeTo(this.entity);
+        const embed = new MessageEmbed()
+            .setTitle(room.displayName)
+            .setDescription(room.desc)
+            .setColor('#1F8B4C')
+            .addField("Occupants", occupants)
+            .addField("Sorties", exits);
+
+        if (embed) messageToSend.embeds.push(embed);
+
+        if (room.actions) {
+            // Room specific actions
+            let buttons = [];
+            room.actions.forEach(a => {
+                const button = new MessageButton()
+                    .setCustomId(`action|${room.name}|${a.id}`)
+                    .setLabel(a.name)
+                    .setStyle('SECONDARY')
+                buttons.push(button);
+            });
+
+            messageToSend.components.push(new MessageActionRow().addComponents(buttons));
+        };
+
+        if (room.exits.length > 0) {
+            // Room specific exits
+            let buttons = [];
+            room.exits.forEach(a => {
+                if (a.hidden) return;
+                const button = new MessageButton()
+                    .setCustomId(`exit|${a.dest}`)
+                    .setLabel(a.name)
+                    .setStyle('PRIMARY')
+                buttons.push(button);
+            });
+
+            messageToSend.components.push(new MessageActionRow().addComponents(buttons));
+        };
+
+        return messageToSend;
+
+    } catch (e) { console.error(e) };
+};
 
 module.exports = { ECS };
