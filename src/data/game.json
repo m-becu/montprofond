@@ -13,6 +13,9 @@
         }
     ],
     "rooms": [
+        { "name": "limbes",
+            "id": -1
+        },
         { "name": "le-portail-béant",
             "id": 0,
             "displayName": "Le Portail Béant",

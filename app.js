@@ -110,7 +110,7 @@ gandalf.login(process.env.TOKEN).then(async () => {
         createdChannels.push(category.id);
 
         const rooms = gameData.rooms.filter(r => r.area === area.name);
-        rooms.forEach(async (room) => {
+        rooms.filter(r => r.id !== -1).forEach(async (room) => {
             let channel = await category.createChannel(room.name);
             room.id = channel.id;
 
