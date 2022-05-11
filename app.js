@@ -51,19 +51,46 @@ for (const file of commandFiles) {
 
 // Handle events
 gandalf.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
-    const command = gandalf.commands.get(interaction.commandName);
 
-    if (!command) return;
-    try {
-        await command.execute(game, interaction);
-    } catch (e) {
-        console.error(e);
-        await interaction.reply({
-            content: "Une erreur est survenue, contactez le Maître du Donjon.",
-            ephemeral: true
-        });
-    }
+    if (interaction.isButton()) {
+        try {
+            let data = interaction.customId.split('|');
+            switch (data[0]) {
+                case 'exit':
+                    game.moveEntity(game.players[interaction.user.id], data[1]);
+                    break;
+
+                case 'action':
+                    
+                    break;
+            
+                default:
+                    break;
+            };
+        } catch (e) {
+            console.error(e);
+            await interaction.reply({
+                content: "Une erreur est survenue, contactez le Maître du Donjon.",
+                ephemeral: true
+            });
+        };
+    };
+
+    if (interaction.isCommand()) {
+        const command = gandalf.commands.get(interaction.commandName);
+
+        if (!command) return;
+        try {
+            await command.execute(game, interaction);
+        } catch (e) {
+            console.error(e);
+            await interaction.reply({
+                content: "Une erreur est survenue, contactez le Maître du Donjon.",
+                ephemeral: true
+            });
+        }
+    };
+
 });
 
 // Handle channels
