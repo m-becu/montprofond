@@ -23,21 +23,25 @@
             "desc": "L'auberge du portail béant est le point de passage privilégié par les aventuriers pour accèder au donjon de Montprofond. D'autres aventuriers passent également par ici pour s'équiper et recueillir des informations avant de descendre.",
             "exits": [
                 { "name": "Puit vers Montprofond",
-                    "dest": "puit-d-entree",
+                    "dest": "puit-d-entrée",
                     "desc": "dans le sous-sol de l'auberge, des hommes de main de Durnand surveillent un profond puit, muni d'un monte-charge"
                 }
             ]
         },
-        { "name": "puit-d-entree",
+        { "name": "puit-d-entrée",
             "id": 1,
             "displayName": "Puit d'Entrée",
             "area": "strate-1",
             "desc": "Au fond du puits d'entrée du Portail Béant se trouve une salle carrée de douze mètres de côté. Le sol est recouvert d'une fine couche de sable et des boucliers cabossés et rouillés ornent les murs maculés de graffitis.",
             "actions": [
-                { "name": "Examiner les boucliers",
+                { "name": "Fouiller le sable",
+                    "desc": "Vous fouillez le sable et trouvez ",
+                    "run": "give|item|trinket",
                     "id": 0
                 },
-                { "name": "Fouiller le sable",
+                { "name": "Examiner les boucliers",
+                    "desc": "Soixante vieux boucliers sont accrochés aux murs; ils se disloquent dès qu'on tente de les manipuler. Le message suivant est inscrit avec du sang sur le mur derrière l'un des boucliers: ",
+                    "run": "read|elven|\n\nAu delà de la forêt de piliers, le Mage dément attend,\nEn lançant des sorts derrière les portails magiques",
                     "id": 1
                 }
             ],
