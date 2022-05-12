@@ -1,6 +1,6 @@
 class Room {
 
-    constructor(roomData) {
+    constructor(roomData, game) {
         const { id, name, displayName, area, desc, exits, actions } = roomData;
         this.id = id;
         this.name = name;
@@ -9,8 +9,10 @@ class Room {
         this.desc = desc;
         this.actions = actions;
         this.exits = exits;
+
         this.channel = null;
         this.entities = {};
+        this.gameActions = this.makeGameActions(game, actions);
     };
 
     async enter(entity) {
@@ -62,6 +64,27 @@ class Room {
             exits: this.generateExitsString(listOfExits),
         };
 
+    };
+
+    makeGameActions(game, actions) {
+        if (!actions) return {};
+        
+        let roomActions = {};
+        actions.forEach(a => {
+            let runCommand = ()=>{};
+            
+            if (a.run && game) {
+                runCommand = game.getRoomAction(a.run);
+            };
+
+            roomActions[a.id] = {
+                id: a.id,
+                name: a.name,
+                run: runCommand
+            }
+        });
+
+        return roomActions;
     };
     
     trigger(triggerName) {};
