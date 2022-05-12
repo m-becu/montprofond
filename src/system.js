@@ -110,18 +110,14 @@ ECS.Game.prototype.moveEntity = async function moveEntity(entity, location) {
 };
 
 ECS.Game.prototype.resolvePlayerAction = async function resolvePlayerAction(entity, room, actionID, interaction) {
-    let reply = { embeds: [], components: [] }
     try {
         let actionData = room.actions[actionID];
         let actionResult = await room.gameActions[actionData.id].run();
 
         let narrationContext = new ECS.Systems.Narration(entity);
-        let embedMessage = await narrationContext.describeAction(actionData, actionResult);
+        let { newEmbed, newComponents } = await narrationContext.describeAction(actionData, actionResult);
 
-        // console.log(embedMessage);
-        reply.embeds.push(embedMessage);
-
-        await interaction.reply(reply);
+        await interaction.reply({ embeds: [newEmbed], components: newComponents });
         
     } catch (e) {
         console.error(e);
@@ -272,6 +268,7 @@ ECS.Systems.Movement.prototype.move = async function move(destination) {
 
 ECS.Systems.Narration = function Narration(entity) {
     this.entity = entity;
+    this.lastDescriptionID = 0;
 };
 
 ECS.Systems.Narration.prototype.whisperMessage = async function whisperMessage(message) {
@@ -314,12 +311,32 @@ ECS.Systems.Narration.prototype.whisperReply = async function whisperReply(messa
 
 ECS.Systems.Narration.prototype.describeAction = async function describeAction(action, message) {
     try {
-        const embed = new MessageEmbed()
+        let user = this.entity.components.member.value.user;
+    
+        await user.createDM();
+        let dm = await user.dmChannel;
+
+        let newComponents;
+        let lastMessage;
+
+        let newEmbed = await new MessageEmbed()
             .setTitle(action.name)
             .setDescription(action.desc + '**' + message + '**.')
             .setColor('#302D8C');
-        
-        return embed;
+
+        await dm.messages.fetch()
+            .then(async messages => {
+
+                let sentMessages = messages.filter(m => m.author.id === process.env.CLIENT_ID);
+                
+                lastMessage = sentMessages.first();
+                newComponents = lastMessage.components;
+                
+                await lastMessage.edit({ embed: lastMessage.embed, components: [] });
+                
+            }).catch(console.error);
+            
+        return { newEmbed, newComponents };
 
     } catch (e) {
         console.error(e);
