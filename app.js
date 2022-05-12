@@ -57,11 +57,15 @@ gandalf.on('interactionCreate', async interaction => {
             let data = interaction.customId.split('|');
             switch (data[0]) {
                 case 'exit':
-                    game.moveEntity(game.players[interaction.user.id], data[1]);
+                    game.moveEntity(game.players[interaction.user.id].entity, data[1]);
                     break;
 
                 case 'action':
-                    
+                    let playerEntity = game.players[interaction.user.id].entity;
+                    let room = game.rooms[data[1]];
+                    let actionID = data[2];
+
+                    await game.resolvePlayerAction(playerEntity, room, actionID, interaction);
                     break;
             
                 default:

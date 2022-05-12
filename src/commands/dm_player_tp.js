@@ -16,10 +16,10 @@ module.exports = {
         let replyMessage = '❗ Seul le Maître du Donjon peut utiliser cette commande.';
 
         if (interaction.member.id === process.env.DM_ID) {
-            let playerEntity = game.players[interaction.options.get('user').value];
+            let player = game.players[interaction.options.get('user').value];
             let room = game.channels[interaction.options.get('destination').value];
 
-            game.moveEntity(playerEntity, room.name);
+            player = await game.moveEntity(player.entity, room.name);
             replyMessage = '✅ Téléportation réussie.';
         };
 

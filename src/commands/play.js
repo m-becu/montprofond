@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { ECS } = require("../system");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,12 +9,12 @@ module.exports = {
             .setRequired(true)),
 
     async execute(game, interaction) {
-        let playerEntity;
+        let player;
 
-        playerEntity = await game.newPlayer(interaction.options.get('name').value, interaction.member);
-        playerEntity = await game.moveEntity(playerEntity, 'le-portail-béant');
+        player = await game.newPlayer(interaction.options.get('name').value, interaction.member);
+        player.entity = await game.moveEntity(player.entity, 'le-portail-béant');
 
-        await playerEntity.components.player.value.roles.add('973006750393454602');
+        await player.member.roles.add('973006750393454602');
 
         interaction.reply({
             content: '✅ Enregistrement du personnage réussi!',

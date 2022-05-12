@@ -1,6 +1,13 @@
-const { Room } = require("./data/room");
+const { Room } = require("./classes/room");
+const { Item } = require("./classes/item");
+const { Player } = require("./classes/player");
 
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+
+const trinketsData = require('../src/data/trinkets.json');
+const randInt = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+};
 
 var ECS = {};
 
@@ -10,6 +17,7 @@ ECS.Game = function game() {
     this.players = {};
     this.channels = {};
     this.entities = {};
+    this.items = {};
     this.rooms = {};
     this.areas = {};
 
@@ -18,23 +26,25 @@ ECS.Game = function game() {
         this.areas[areaData.name] = areaData;
     };
     for (const roomData of gameData.rooms) {
-        this.rooms[roomData.name] = new Room(roomData);
+        this.newRoom(roomData);
     };
 
     return this;
 };
 
 ECS.Game.prototype.newPlayer = function newPlayer(name, memberData) {
-    let playerEntity = new ECS.Entity();
+    let entity = new ECS.Entity();
     
-    playerEntity.addComponent(new ECS.Components.Name(name));
-    playerEntity.addComponent(new ECS.Components.Player(memberData));
-    playerEntity.addComponent(new ECS.Components.Location(this.rooms['limbes']));
+    entity.addComponent(new ECS.Components.Name(name));
+    entity.addComponent(new ECS.Components.Member(memberData));
+    entity.addComponent(new ECS.Components.Location(this.rooms['limbes']));
 
-    this.entities[playerEntity.id] = playerEntity;
-    this.players[memberData.id] = playerEntity;
+    let player = new Player(entity);
 
-    return playerEntity;
+    this.entities[entity.id] = player;
+    this.players[memberData.id] = player;
+
+    return player;
 };
 
 ECS.Game.prototype.newNPC = function newNPC(npcData) {
@@ -53,27 +63,124 @@ ECS.Game.prototype.newNPC = function newNPC(npcData) {
 };
 
 ECS.Game.prototype.newRoom = function newRoom(roomData) {
-    let room = new Room(roomData);
+    let room = new Room(roomData, this);
     this.rooms[room.name] = room;
     return room;
 };
 
+ECS.Game.prototype.newItem = function newItem(itemData) {
+    let entity = new ECS.Entity();
+
+    entity.addComponent(new ECS.Components.Name(itemData.name));
+    entity.addComponent(new ECS.Components.Desc(itemData.desc));
+
+    let item = new Item(entity);
+
+    this.entities[entity.id] = item;
+    this.items[itemData.id] = item;
+
+    return item;
+};
+
 ECS.Game.prototype.moveEntity = async function moveEntity(entity, location) {
-    if (!this.rooms[location]) return entity;
-    
-    if (entity.hasComponent('player')) {
+    try {
+        if (!this.rooms[location]) {
+            console.log("This room doesn't exist.");
+            return entity
+        };
+        if (!entity.hasComponent('location')) {
+            console.log("This entity doesn't have a location component.");
+            return entity
+        };
+
         let entityMovement = new ECS.Systems.Movement(entity);
-        let entityNarration = new ECS.Systems.Narration(entity);
+        entity = await entityMovement.move(this.rooms[location]);
         
+        if (!entity.hasComponent('member')) return entity;
+        
+        let entityNarration = new ECS.Systems.Narration(entity);
         let roomDescription = entityNarration.describeRoom(this.rooms[location]);
+        
+        await entityNarration.whisperMessage(roomDescription);
 
-        try {
-            entityMovement.moveEntity(this.rooms[location]);
-            entityNarration.whisperMessage(roomDescription);
+        return entity;
+    } catch (e) {
+        console.error(e);
+    }
+};
 
-        } catch (e) { console.error(e); }
+ECS.Game.prototype.resolvePlayerAction = async function resolvePlayerAction(entity, room, actionID, interaction) {
+    let reply = { embeds: [], components: [] }
+    try {
+        let actionData = room.actions[actionID];
+        let actionResult = await room.gameActions[actionData.id].run();
+
+        let narrationContext = new ECS.Systems.Narration(entity);
+        let embedMessage = await narrationContext.describeAction(actionData, actionResult);
+
+        // console.log(embedMessage);
+        reply.embeds.push(embedMessage);
+
+        await interaction.reply(reply);
+        
+    } catch (e) {
+        console.error(e);
+        await interaction.reply({
+            content: "Une erreur est survenue, contactez le Maître du Donjon.",
+            ephemeral: true
+        });
     };
-    return entity;
+
+};
+
+ECS.Game.prototype.getRoomAction = function getRoomAction(_data) {
+    let action = ()=>{};
+    let data = _data.split('|');
+
+    switch (data[0]) {
+        case 'give':
+            switch (data[1]) {
+                case 'item':
+                    switch (data[2]) {
+                        case 'trinket':
+                            let contextTable = new ECS.Systems.Tables();
+                            action = (() => {
+                                let newItem = this.newItem(contextTable.getTrinket());
+                                // Add item to player inventory
+                                return newItem.name;
+                            });
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                    break;
+            
+                default:
+                    break;
+            }
+            break;
+            
+        case 'read':
+            switch (data[1]) {
+                case 'elven':
+                    action = () => {
+                        // Vérifier si le joueur peut lire le message
+                        return data[2];
+                    };
+                    break;
+
+                case 'common':
+                default:
+                    break;
+            }
+            break;
+        
+        default:
+            break;
+    };
+
+    return action;
 };
 
 // E N T I T I E S
@@ -128,12 +235,18 @@ ECS.Components.Name = function name(value) {
 };
 ECS.Components.Name.prototype.name = 'name';
 
-ECS.Components.Player = function player(value) {
+ECS.Components.Desc = function desc(value) {
+    this.value = value || "";
+    return this;
+};
+ECS.Components.Desc.prototype.name = 'desc';
+
+ECS.Components.Member = function member(value) {
     if (!value) return;
     this.value = value;
     return this;
 };
-ECS.Components.Player.prototype.name = 'player';
+ECS.Components.Member.prototype.name = 'member';
 
 ECS.Components.Location = function location(room) {
     this.room = room || new Room({ id: -1, name: 'limbes' });
@@ -149,7 +262,7 @@ ECS.Systems.Movement = function Movement(entity) {
     return this;
 };
 
-ECS.Systems.Movement.prototype.moveEntity = async function moveEntity(destination) {
+ECS.Systems.Movement.prototype.move = async function move(destination) {
     if (this.entity.hasComponent('location')) {
         await this.entity.components.location.room.leave(this.entity);
         this.entity.components.location.room = await destination.enter(this.entity);
@@ -163,20 +276,54 @@ ECS.Systems.Narration = function Narration(entity) {
 
 ECS.Systems.Narration.prototype.whisperMessage = async function whisperMessage(message) {
     // Verify that entity is player
-    if (!this.entity.hasComponent('player')) return;
-    let user = this.entity.components.player.value.user;
+    try {
+        let user = this.entity.components.member.value.user;
 
-    await user.createDM();
-    let dm = await user.dmChannel;
-    dm.messages.fetch()
-        .then(async messages => {
-            let sentMessages = messages.filter(m => m.author.id === process.env.CLIENT_ID);
-            for (const [k, sent] of sentMessages) {
-                await sent.delete();
-            };
-            await dm.send(message);
-        })
-        .catch(console.error);
+        await user.createDM();
+        let dm = await user.dmChannel;
+        dm.messages.fetch()
+            .then(async messages => {
+                let sentMessages = messages.filter(m => m.author.id === process.env.CLIENT_ID);
+                for (const [k, sent] of sentMessages) {
+                    await sent.delete();
+                };
+                await dm.send(message);
+            }).catch(console.error);
+
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+ECS.Systems.Narration.prototype.whisperReply = async function whisperReply(message) {
+    try {
+        let user = this.entity.components.member.value.user;
+
+        await user.createDM();
+        let dm = await user.dmChannel;
+        
+        await dm.send({
+            content: message || "Erreur description.",
+            ephemeral: true
+        });
+
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+ECS.Systems.Narration.prototype.describeAction = async function describeAction(action, message) {
+    try {
+        const embed = new MessageEmbed()
+            .setTitle(action.name)
+            .setDescription(action.desc + '**' + message + '**.')
+            .setColor('#302D8C');
+        
+        return embed;
+
+    } catch (e) {
+        console.error(e);
+    }
 };
 
 ECS.Systems.Narration.prototype.describeRoom = function describeRoom(room) {
@@ -227,6 +374,20 @@ ECS.Systems.Narration.prototype.describeRoom = function describeRoom(room) {
         return messageToSend;
 
     } catch (e) { console.error(e) };
+};
+
+ECS.Systems.Tables = function Tables() {
+    this.trinkets = {};
+
+    for (const trinket of trinketsData) {
+        this.trinkets[trinket.id] = trinket;
+    };
+};
+
+ECS.Systems.Tables.prototype.getTrinket = function getTrinket(id) {
+    let trinketID = id || randInt(0, trinketsData.length - 1);
+
+    return this.trinkets[trinketID];
 };
 
 module.exports = { ECS };
