@@ -1,14 +1,12 @@
 {
     "players": [],
     "areas": [
-        {
+        { "name": "strate-0",
             "id": 0,
-            "name": "strate-0",
             "displayName": "🛕 Eauprofonde"
         },
-        {
+        { "name": "strate-1",
             "id": 1,
-            "name": "strate-1",
             "displayName": "🏰 Strate du Donjon"
         }
     ],
@@ -75,7 +73,24 @@
             "displayName": "Salle des Piliers",
             "area": "strate-1",
             "desc": "A l'extrémité ouest d'un couloir de six mètres de large, un escalier descend de trois mètres vers une salle remplie de colonnes. Un escalier similaire descend dans la pièce depuis des couloirs de trois mètres de large qui s'étendent vers le nord, l'ouest et le sud. Autour de vous, des renfoncements en forme de porte sont disséminés tous les trois mètres, chacun contenant un bas-relief représentant un démon différent. Le squelette d'une étrange créature est étendu par terre, avec l'un de ses bras pointé en direction d'un bas-relief.",
-            "exits": []
+            "exits": [
+                { "name": "Couloir du puit",
+                    "dest": "puit-d-entrée",
+                    "desc": "le couloir menant au puit d'entrée du Portail Béant"
+                },
+                { "name": "Couloir nord",
+                    "dest": "couloir-45",
+                    "desc": "un long couloir, au nord de la forêt de piliers"
+                },
+                { "name": "Sortie ouest",
+                    "dest": "galerie-des-miroirs",
+                    "desc": "une vollée, à l'ouest de la forêt de piliers"
+                },
+                { "name": "Couloir sud",
+                    "dest": "site-de-fouille",
+                    "desc": "un long couloir, au sud de la forêt de piliers"
+                }
+            ]
         },
         { "name": "piece-inclinee",
             "id": 3,
@@ -94,6 +109,13 @@
         { "name": "repere-du-grell",
             "id": 5,
             "displayName": "Le Répère du Grell",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        },
+        { "name": "couloir-45",
+            "id": 45,
+            "displayName": "Couloir",
             "area": "strate-1",
             "desc": "",
             "exits": []
