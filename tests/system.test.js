@@ -1,76 +1,81 @@
-const { Room } = require("../src/data/room");
+const { Room } = require("../src/classes/room");
+const { Item } = require("../src/classes/item");
+const { Player } = require("../src/classes/player");
 
 const { ECS } = require("../src/system");
 
-describe('a player', () => {
+describe('undermountain', () => {
 
     let game;
-    let player;
+    let entity;
+
+    beforeAll(() => {});
 
     beforeEach(() => {
         game = new ECS.Game();
-        player = game.newPlayer('Arshavin', {});
+        entity = new ECS.Entity();
     });
 
-    it('should have a specific set of components', () => {
+    describe('the entity-component system', () => {
 
-        expect(player.hasComponent('name')).toBe(true);
-        expect(player.hasComponent('player')).toBe(true);
-        expect(player.hasComponent('location')).toBe(true);
-    });
+        it('should create entities with unique ids', () => {
+            let entities = [];
+            let testArr = [1, 1, 2, 4, 8, 16];
+            let isDuplicateExist = arr => new Set(arr).size !== arr.length;
+            
+            for (i=0;i<10000;i++) { entities.push(new ECS.Entity()) };
 
-});
-
-describe('a room', () => {
-
-    let game;
-    let player;
-
-    beforeEach(() => {
-        game = new ECS.Game();
-        player = game.newPlayer('Arshavin', {});
-    });
-
-    it('should handle entity enter and leaving', () => {
-
-        game.moveEntity(player, 'puit-d-entree');
-        let room = player.components.location.room;
-
-        expect(room.entities[player.id]).toEqual(player);
-
-        game.moveEntity(player, 'le-portail-béant');
-
-        expect(room.entities[player.id]).toBeUndefined();
-    });
-
-});
-
-describe('the entity component system', () => {
-
-    let game;
-    let player;
-
-    beforeEach(() => {
-        game = new ECS.Game();
-        player = game.newPlayer('Arshavin', {});
-    });
-
-    it('can create a new player entity', () => {
-        expect(player.components.player.value).toBeDefined();
-        expect(game.entities[player.id]).toEqual(player);
-    });
-
-    it('can move an entity to a new location', () => {
-        let halaster = game.newNPC({
-            name: 'Halaster',
-            location: new Room({ id: 666, name: 'laboratoire-d-halaster' })
+            expect(isDuplicateExist(testArr)).toBeTruthy();
+            expect(isDuplicateExist(entities)).toBeFalsy();
         });
 
-        game.moveEntity(player, 'puit-d-entree');
-        game.moveEntity(halaster, 'puit-d-entree');
+        it('should be able to create new players', () => {
 
-        expect(player.components.location.room.name).toBe('puit-d-entree');
-        expect(halaster.components.location.room.name).toBe('puit-d-entree');
+            expect(game.newPlayer('Arshavin', {id:0})).toBeInstanceOf(Player);
+        });
+        
+    });
+
+    describe('the room actions system', () => {
+
+        it('should attribute the right action to the room object', () => {
+            let exampleRoom = game.rooms["puit-d-entrée"];
+
+            expect(exampleRoom.name).toBe("puit-d-entrée");
+            expect(exampleRoom.gameActions[0].run).toBeInstanceOf(Function);
+            expect(typeof exampleRoom.gameActions[0].run()).toBe('string');
+        });
+    });
+
+    describe('the movement system', () => {
+
+        it('can move an entity from room to room', async () => {
+            entity.addComponent(new ECS.Components.Location(game.rooms['limbes']));
+            
+            await game.moveEntity(entity, 'le-portail-béant');
+
+            expect(entity.components.location.room.name).toBe('le-portail-béant');
+        });
+
+    });
+
+    describe('the tables system', () => {
+
+        it('can return a random trinket', () => {
+            let contextTable = new ECS.Systems.Tables(entity, game.rooms['limbes']);
+            let randomTrinkets = [];
+            let n = 10000;
+            
+            for (i=0;i<n;i++) {
+                let newTrinketItem = contextTable.getTrinket();
+                randomTrinkets.push(newTrinketItem);
+                expect(newTrinketItem.name).toBeDefined();
+            };
+
+            expect(randomTrinkets).toBeDefined();
+            expect(randomTrinkets.length).toBe(n);
+        });
+
     });
 
 });
