@@ -480,7 +480,6 @@ export class NarrationSystem {
                         if (!detectionCheck) return
                         if (e.find.dd > detectionCheck) return
                         else {
-                            console.log(`Entity ${this.entity.id} has detected a secret exit!`)
                             listOfExits.push(e)
                             return
                         }
@@ -565,8 +564,6 @@ export class NarrationSystem {
         
         return exitsString === "" ? "Il ne semble n'y avoir aucune sortie à cette pièce." : list.length > 1 ? `Il y a différentes sorties dans cette pièce: ${exitsString}.` : `La seule sortie semble être ${exitsString}.`
     }
-
-    describeSecrets() {}
 
 }
 export class ResearchSystem {
