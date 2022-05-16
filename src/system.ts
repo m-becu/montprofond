@@ -4,8 +4,11 @@ import { Player } from './classes/player'
 
 import { ButtonInteraction, Collection, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed, Snowflake, TextChannel } from 'discord.js'
 
+// Import config
+require('dotenv').config()
+
 // F U N C T I O N S
-const trinketsData = require('../src/data/trinkets.json')
+const trinketsData = require(process.env.DATA_FOLDER + 'trinkets.json')
 const randInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
@@ -26,7 +29,7 @@ export interface IGameData {
 export interface IComponent {
     name: string
     value: any
-    [key: string]: any
+    check?: number
 }
 
 // G A M E
@@ -52,7 +55,7 @@ export class Game {
 
         this.researchSystem = new ResearchSystem(this)
 
-        var gameData = require('./data/game.json')
+        var gameData = require(process.env.DATA_FOLDER + 'game.json')
         
         for (const areaData of gameData.areas) {
             this.areas[areaData.name] = areaData
@@ -124,8 +127,8 @@ export class Game {
         return item
     }
 
-    getRoomAction(_data: string) {
-        let action = ()=>{}
+    getRoomAction(_room: Room, _data: string): Function {
+        let action: Function = ()=>{}
         let data = _data.split('|')
     
         switch (data[0]) {
@@ -137,7 +140,7 @@ export class Game {
                                 action = (() => {
                                     let newItem = this.newItem(new TableSystem().getRandomTrinket())
                                     // Add item to player inventory
-                                    return newItem.name
+                                    return { desc: newItem.name }
                                 })
                                 break
                         
@@ -154,9 +157,9 @@ export class Game {
             case 'read':
                 switch (data[1]) {
                     case 'elven':
-                        action = () => {
+                        action = function (args: IGameData) {
                             // Vérifier si le joueur peut lire le message
-                            return data[2]
+                            return { desc: data[2] }
                         }
                         break
     
@@ -166,6 +169,17 @@ export class Game {
                 }
                 break
             
+            case 'check':
+                action = function (args: IGameData) {
+                    let { entity } = args
+                    let checked = entity.hasComponent(data[1])
+
+                    if (checked && checked.check) {
+                        return checked.check > parseInt(data[2]) ? { desc: "Vous entendez également de lègers bruits de pas s'éloignant dans le couloir." } : {}
+                    } else return {}
+                }
+                break
+
             default:
                 break
         }
@@ -207,11 +221,12 @@ export class Game {
 
     async resolvePlayerAction(entity: Entity, room: Room, actionID: number, interaction: ButtonInteraction) {
         try {
+
             let actionData = room.actions[actionID]
-            let actionResult = await room.gameActions[actionData.id].run()
+            let actionResult = await room.gameActions[actionData.id].run({ entity })
     
             let narrationContext = new NarrationSystem(entity)
-            let newMessageData = await narrationContext.describeAction(actionData, actionResult)
+            let newMessageData = await narrationContext.describeAction(actionData, actionResult.desc ? actionResult.desc : "")
 
             if (newMessageData?.newComponents && newMessageData.newEmbed) {
                 let { newEmbed, newComponents } = newMessageData
@@ -311,12 +326,12 @@ export class HealthComponent implements IComponent {
 export class DetectionComponent implements IComponent {
     name: string
     value: number
-    perceptionCheck: number
+    check: number
 
     constructor(value: number) {
         this.name = 'detection'
         this.value = value
-        this.perceptionCheck = 0
+        this.check = 0
     }
 }
 
@@ -419,7 +434,7 @@ export class NarrationSystem {
     
             let newEmbed = await new MessageEmbed()
                 .setTitle(action.name)
-                .setDescription(action.desc + '**' + message + '**.')
+                .setDescription(`${action.desc}${message.length === 0 ? '.' : `**${message}**.`}`)
                 .setColor('#302D8C')
     
             await dm.messages.fetch()
@@ -460,7 +475,10 @@ export class NarrationSystem {
                 if (e.hidden) {
                     if (!this.entity.hasComponent('detection')) return
                     else {
-                        if (e.find.dd > this.entity.components.detection.perceptionCheck) return
+                        let detectionCheck = this.entity.components.detection.check
+
+                        if (!detectionCheck) return
+                        if (e.find.dd > detectionCheck) return
                         else {
                             console.log(`Entity ${this.entity.id} has detected a secret exit!`)
                             listOfExits.push(e)
@@ -557,7 +575,7 @@ export class ResearchSystem {
 
     update() {
         Object.values(this.game.entities).filter(e => e.hasComponent('detection')).forEach(e => {
-            e.components.detection.perceptionCheck = this.game.roll(1, 20) + e.components.detection.value
+            e.components.detection.check = this.game.roll(1, 20) + e.components.detection.value
         })
     }
 

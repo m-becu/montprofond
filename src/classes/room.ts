@@ -1,6 +1,16 @@
 import { TextChannel } from "discord.js"
 import { Entity, Game, IGameData } from "../system"
 
+export interface IRoomAction {
+    id: number,
+    name: string,
+    run: (args: IGameData) => IRoomActionResult
+}
+
+export interface IRoomActionResult {
+    [key: string]: any
+}
+
 export class Room {
 
     id: string
@@ -13,7 +23,7 @@ export class Room {
 
     channel: TextChannel | null
     entities: { [key: string]: Entity }
-    gameActions: { [key: string]: IGameData }
+    gameActions: { [key: string]: IRoomAction }
 
     constructor(roomData: IGameData, game: Game) {
         const { id, name, displayName, area, desc, exits, actions } = roomData
@@ -63,19 +73,17 @@ export class Room {
     makeGameActions(game: Game, actions: IGameData[]) {
         if (!actions) return {}
         
-        let roomActions: { [key: string]: IGameData } = {}
+        let roomActions: { [key: string]: IRoomAction } = {}
         actions.forEach(a => {
-            let runCommand = ()=>{}
+            if (!a.run || !game) return
             
-            if (a.run && game) {
-                runCommand = game.getRoomAction(a.run)
-            }
-
+            let action = game.getRoomAction(this, a.run)
             roomActions[a.id] = {
                 id: a.id,
                 name: a.name,
-                run: runCommand
+                run: (args: IGameData): IRoomActionResult => { return action(args) }
             }
+
         })
 
         return roomActions
