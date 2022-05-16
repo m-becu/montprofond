@@ -65,6 +65,7 @@ export class Game {
         entity.addComponent(new NameComponent(name))
         entity.addComponent(new MemberComponent(memberData))
         entity.addComponent(new LocationComponent(this.rooms['limbes']))
+        entity.addComponent(new HealthComponent(20))
     
         let player = new Player(entity)
     
@@ -276,6 +277,15 @@ export class LocationComponent implements IComponent {
 
     constructor(value: Room) {
         this.name = 'location'
+        this.value = value
+    }
+}
+export class HealthComponent implements IComponent {
+    name: string
+    value: number
+
+    constructor(value: number) {
+        this.name = 'health'
         this.value = value
     }
 }

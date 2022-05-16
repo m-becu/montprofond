@@ -10,10 +10,12 @@ export class Player {
     location: Room
     member: Object
 
+    health: number
+
     constructor(entity: Entity) {
 
         const { id, components } = entity
-        const { name, location, member } = components
+        const { name, location, member, health } = components
 
         this.entity = entity
         
@@ -21,6 +23,8 @@ export class Player {
         this.name = name.value
         this.location = location.value
         this.member = member.value
+
+        this.health = health.value
 
     }
 
