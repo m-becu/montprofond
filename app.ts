@@ -95,7 +95,7 @@ gandalf.on('interactionCreate', async (interaction: Interaction) => {
                     switch(data[1]) {
 
                         case 'inventory':
-                            console.log("Show player inventory")
+                            console.log(playerEntity.components.inventory.value)
                             await interaction.reply({
                                 content: "Affichage de l'inventaire"
                             })

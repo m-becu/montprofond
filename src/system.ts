@@ -87,6 +87,7 @@ export class Game {
         entity.addComponent(new LocationComponent(this.rooms['limbes']))
         entity.addComponent(new HealthComponent(20))
         entity.addComponent(new DetectionComponent(0))
+        entity.addComponent(new InventoryComponent([]))
     
         let player = new Player(entity)
     
@@ -141,9 +142,12 @@ export class Game {
                     case 'item':
                         switch (data[2]) {
                             case 'trinket':
-                                action = (() => {
+                                action = ((args: IGameData) => {
                                     let newItem = this.newItem(new TableSystem().getRandomTrinket())
                                     // Add item to player inventory
+                                    if (args.entity.hasComponent('inventory')) {
+                                        args.entity.components.inventory.value.push(newItem)
+                                    }
                                     return { desc: newItem.name }
                                 })
                                 break
@@ -336,6 +340,19 @@ export class DetectionComponent implements IComponent {
         this.name = 'detection'
         this.value = value
         this.check = 0
+    }
+}
+export class InventoryComponent implements IComponent {
+    name: string
+    value: Entity[]
+
+    constructor(value: Entity[]) {
+        this.value = value
+        this.name = 'inventory'
+    }
+
+    list() {
+        this.value.forEach(i => console.log(`\n${i.components.name}\t${i.components.desc}`))
     }
 }
 
