@@ -81,14 +81,42 @@ gandalf.on('interactionCreate', async (interaction: Interaction) => {
                     break
 
                 case 'action':
-                    let playerEntity = game.players[interaction.user.id].entity
-                    let room = game.rooms[data[1]]
-                    let actionID = parseInt(data[2])
+                    var playerEntity = game.players[interaction.user.id].entity
+                    var room = game.rooms[data[1]]
+                    var actionID = parseInt(data[2])
 
-                    await game.resolvePlayerAction(playerEntity, room, actionID, interaction)
+                    await game.handleRoomAction(playerEntity, room, actionID, interaction)
                     break
             
+                case 'pa':
+                    var playerEntity = game.players[interaction.user.id].entity
+                    var room = game.rooms[playerEntity.components.location.value.name]
+
+                    switch(data[1]) {
+
+                        case 'inventory':
+                            console.log("Show player inventory")
+                            await interaction.reply({
+                                content: "Affichage de l'inventaire"
+                            })
+                            break
+                        
+                        default:
+                            console.log(`Unhandled interaction: ${data}`)
+                            await interaction.reply({
+                                content: "Cette fonction n'est pas encore implémentée.",
+                                ephemeral: true
+                            })
+                            break
+                    }
+                    break
+                
                 default:
+                    console.log(`Unhandled interaction: ${data}`)
+                    await interaction.reply({
+                        content: "Cette fonction n'est pas encore implémentée.",
+                        ephemeral: true
+                    })
                     break
             }
         } catch (e) {

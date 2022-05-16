@@ -31,6 +31,10 @@ export interface IComponent {
     value: any
     check?: number
 }
+export interface IPlayerAction {
+    id: string
+    name: string
+}
 
 // G A M E
 export class Game {
@@ -219,7 +223,7 @@ export class Game {
         }
     }
 
-    async resolvePlayerAction(entity: Entity, room: Room, actionID: number, interaction: ButtonInteraction) {
+    async handleRoomAction(entity: Entity, room: Room, actionID: number, interaction: ButtonInteraction) {
         try {
 
             let actionData = room.actions[actionID]
@@ -497,9 +501,27 @@ export class NarrationSystem {
                 .setColor('#1F8B4C')
                 .addField("Occupants", occupants)
                 .addField("Sorties", exits)
+
+            // Make player interactions
+            const playerActions: IPlayerAction[] = [
+                { id: 'pa|search',
+                    name: 'Fouille'
+                },
+                { id: 'pa|inventory',
+                    name: 'Inventaire'
+                }
+            ]
+
+            if (playerActions.length > 0 && playerActions.length < 5) {
+                componentsRow.push(
+                    new MessageActionRow().addComponents(
+                        this.generatePlayerActions(playerActions)
+                    )
+                )
+            }
     
+            // Make room specific interactions
             if (room.actions) {
-                // Room specific actions
                 let buttons: MessageButton[] = []
                 room.actions.forEach(a => {
                     if (a.condition) {
@@ -515,8 +537,8 @@ export class NarrationSystem {
                 componentsRow.push(new MessageActionRow().addComponents(buttons))
             }
     
+            // Make room exits interactions
             if (listOfExits.length > 0) {
-                // Room specific exits
                 let buttons: MessageButton[] = []
                 listOfExits.forEach(a => {
                     const button = new MessageButton()
@@ -527,14 +549,13 @@ export class NarrationSystem {
                 })
                 componentsRow.push(new MessageActionRow().addComponents(buttons))
             }
-    
-            // console.log('🍪', embed, componentsRow)
+            
             return { embeds: [embed], components: componentsRow }
     
         } catch (e) { console.error(e) }
     }
 
-    describeOccupants(list: Entity[]) {
+    describeOccupants(list: Entity[]):string {
         list.sort(function (a, b) {
             let nameA = a.components.name.value.toLowerCase()
             let nameB = b.components.name.value.toLowerCase()
@@ -553,7 +574,7 @@ export class NarrationSystem {
         return occupantsString === "" ? "Il n'y a personne ici." : occupantsString.length <= 1000 ? `Il y a ${occupantsString} dans cette pièce.` : "Il y a de nombreuses personnes dans cette pièce!"
     }
 
-    describeExits(list: IGameData[]) {
+    describeExits(list: IGameData[]): string {
         let exitsString = ""
         if (list.length === 1) exitsString = list[0].desc
         else if (list.length === 2) exitsString = `${list[0].desc} et ${list[1].desc}`
@@ -563,6 +584,26 @@ export class NarrationSystem {
         }
         
         return exitsString === "" ? "Il ne semble n'y avoir aucune sortie à cette pièce." : list.length > 1 ? `Il y a différentes sorties dans cette pièce: ${exitsString}.` : `La seule sortie semble être ${exitsString}.`
+    }
+
+    generatePlayerActions(list: IPlayerAction[]): MessageButton[] {
+        try {
+
+            let buttons: MessageButton[] = []
+            list.forEach(a => {
+                const button = new MessageButton()
+                    .setCustomId(a.id)
+                    .setLabel(a.name)
+                    .setStyle('SUCCESS')
+                buttons.push(button)
+            })
+
+            return buttons
+
+        } catch (e) { 
+            console.error(e)
+            return [] 
+        }
     }
 
 }
