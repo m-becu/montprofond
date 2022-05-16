@@ -26,6 +26,7 @@ export interface IGameData {
 export interface IComponent {
     name: string
     value: any
+    [key: string]: any
 }
 
 // G A M E
@@ -37,6 +38,8 @@ export class Game {
     items: { [key: string]: Item }
     rooms: { [key: string]: Room }
     areas: { [key: string]: IGameData }
+    
+    researchSystem: ResearchSystem
 
     constructor() {
 
@@ -46,6 +49,8 @@ export class Game {
         this.items = {}
         this.rooms = {}
         this.areas = {}
+
+        this.researchSystem = new ResearchSystem(this)
 
         var gameData = require('./data/game.json')
         
@@ -59,6 +64,14 @@ export class Game {
 
     }
 
+    roll(dices: number, faces: number): number {
+        let res = 0;
+        for (let i=0; i<dices; i++) {
+            res += randInt(1, faces)
+        }
+        return res
+    }
+
     newPlayer(name: string, memberData: GuildMember) {
         let entity = new Entity()
         
@@ -66,6 +79,7 @@ export class Game {
         entity.addComponent(new MemberComponent(memberData))
         entity.addComponent(new LocationComponent(this.rooms['limbes']))
         entity.addComponent(new HealthComponent(20))
+        entity.addComponent(new DetectionComponent(0))
     
         let player = new Player(entity)
     
@@ -161,14 +175,18 @@ export class Game {
 
     async moveEntity(entity: Entity, location: string) {
         try {
+
             if (!this.rooms[location]) {
                 console.log("This room doesn't exist.")
                 return entity
             }
+
             if (!entity.hasComponent('location')) {
                 console.log("This entity doesn't have a location component.")
                 return entity
             }
+
+            this.researchSystem.update()
     
             let entityMovement = new MovementSystem(entity)
             entity = await entityMovement.move(this.rooms[location])
@@ -181,6 +199,7 @@ export class Game {
             if (roomDescription) await entityNarration.whisperMessage(roomDescription)
     
             return entity
+
         } catch (e) {
             console.error(e)
         }
@@ -287,6 +306,17 @@ export class HealthComponent implements IComponent {
     constructor(value: number) {
         this.name = 'health'
         this.value = value
+    }
+}
+export class DetectionComponent implements IComponent {
+    name: string
+    value: number
+    perceptionCheck: number
+
+    constructor(value: number) {
+        this.name = 'detection'
+        this.value = value
+        this.perceptionCheck = 0
     }
 }
 
@@ -456,6 +486,21 @@ export class NarrationSystem {
             return { embeds: [embed], components: componentsRow }
     
         } catch (e) { console.error(e) }
+    }
+
+}
+export class ResearchSystem {
+    
+    game: Game
+
+    constructor(game: Game) {
+        this.game = game
+    }
+
+    update() {
+        Object.values(this.game.entities).filter(e => e.hasComponent('detection')).forEach(e => {
+            e.components.detection.perceptionCheck = this.game.roll(1, 20) + e.components.detection.value
+        })
     }
 
 }
