@@ -503,6 +503,10 @@ export class NarrationSystem {
                 // Room specific actions
                 let buttons: MessageButton[] = []
                 room.actions.forEach(a => {
+                    if (a.condition) {
+                        let data = a.condition.split('|')
+                        if (data[0] !== 'exit' || !listOfExits.filter(e => e.dest === data[1])[0]) return
+                    }
                     const button = new MessageButton()
                         .setCustomId(`action|${room.name}|${a.id}`)
                         .setLabel(a.name)
