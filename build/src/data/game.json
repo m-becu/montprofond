@@ -1,0 +1,124 @@
+{
+    "players": [],
+    "areas": [
+        { "name": "strate-0",
+            "id": 0,
+            "displayName": "🛕 Eauprofonde"
+        },
+        { "name": "strate-1",
+            "id": 1,
+            "displayName": "🏰 Strate du Donjon"
+        }
+    ],
+    "rooms": [
+        { "name": "limbes",
+            "id": -1
+        },
+        { "name": "le-portail-béant",
+            "id": 0,
+            "displayName": "Le Portail Béant",
+            "area": "strate-0",
+            "desc": "L'auberge du portail béant est le point de passage privilégié par les aventuriers pour accèder au donjon de Montprofond. D'autres aventuriers passent également par ici pour s'équiper et recueillir des informations avant de descendre.",
+            "exits": [
+                { "name": "Puit vers Montprofond",
+                    "dest": "puit-d-entrée",
+                    "desc": "dans le sous-sol de l'auberge, des hommes de main de Durnand surveillent un profond puit, muni d'un monte-charge"
+                }
+            ]
+        },
+        { "name": "puit-d-entrée",
+            "id": 1,
+            "displayName": "Puit d'Entrée",
+            "area": "strate-1",
+            "desc": "Au fond du puits d'entrée du Portail Béant se trouve une salle carrée de douze mètres de côté. Le sol est recouvert d'une fine couche de sable et des boucliers cabossés et rouillés ornent les murs maculés de graffitis.",
+            "actions": [
+                { "name": "Fouiller le sable",
+                    "desc": "Vous fouillez le sable et trouvez ",
+                    "run": "give|item|trinket",
+                    "id": 0
+                },
+                { "name": "Examiner les boucliers",
+                    "desc": "Soixante vieux boucliers sont accrochés aux murs; ils se disloquent dès qu'on tente de les manipuler. Le message suivant est inscrit avec du sang sur le mur derrière l'un des boucliers: ",
+                    "run": "read|elven|\n\nAu delà de la forêt de piliers, le Mage dément attend,\nEn lançant des sorts derrière les portails magiques",
+                    "id": 1
+                }
+            ],
+            "exits": [
+                { "name": "Corde du puit",
+                    "dest": "le-portail-béant",
+                    "desc": "derrière vous, en tirant sur la corde pour qu'on vous remonte"
+                },
+                { "name": "Tunnel sud",
+                    "dest": "salle-des-piliers", 
+                    "desc": "un tunnel qui s'étend vers le sud avant de tourner vers l'ouest"
+                },
+                { "name": "Porte secrète",
+                    "dest": "couloir-45",
+                    "desc": "une porte secrète à sens unique dans le mur nord ne peut pas être ouverte de ce côté par des moyens conventionels. Vous remarquez également un trou de trois centimètres de diamètre qui la traverse à une hauteur d'un mètre cinquante",
+                    "hidden": true,
+                    "locked": {
+                        "key": null,
+                        "lockpick": -1,
+                        "magic": false
+                    },
+                    "find": {
+                        "carac": "perception",
+                        "dd": 12
+                    }
+                }
+            ]
+        },
+        { "name": "salle-des-piliers",
+            "id": 2,
+            "displayName": "Salle des Piliers",
+            "area": "strate-1",
+            "desc": "A l'extrémité ouest d'un couloir de six mètres de large, un escalier descend de trois mètres vers une salle remplie de colonnes. Un escalier similaire descend dans la pièce depuis des couloirs de trois mètres de large qui s'étendent vers le nord, l'ouest et le sud. Autour de vous, des renfoncements en forme de porte sont disséminés tous les trois mètres, chacun contenant un bas-relief représentant un démon différent. Le squelette d'une étrange créature est étendu par terre, avec l'un de ses bras pointé en direction d'un bas-relief.",
+            "exits": [
+                { "name": "Couloir du puit",
+                    "dest": "puit-d-entrée",
+                    "desc": "le couloir menant au puit d'entrée du Portail Béant"
+                },
+                { "name": "Couloir nord",
+                    "dest": "couloir-45",
+                    "desc": "un long couloir, au nord de la forêt de piliers"
+                },
+                { "name": "Sortie ouest",
+                    "dest": "galerie-des-miroirs",
+                    "desc": "une vollée, à l'ouest de la forêt de piliers"
+                },
+                { "name": "Couloir sud",
+                    "dest": "site-de-fouille",
+                    "desc": "un long couloir, au sud de la forêt de piliers"
+                }
+            ]
+        },
+        { "name": "piece-inclinee",
+            "id": 3,
+            "displayName": "Pièce inclinée",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        },
+        { "name": "epee-en-main",
+            "id": 4,
+            "displayName": "Epée en main",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        },
+        { "name": "repere-du-grell",
+            "id": 5,
+            "displayName": "Le Répère du Grell",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        },
+        { "name": "couloir-45",
+            "id": 45,
+            "displayName": "Couloir",
+            "area": "strate-1",
+            "desc": "",
+            "exits": []
+        }
+    ]
+}
