@@ -54,7 +54,7 @@
                 },
                 { "name": "Porte secrète",
                     "dest": "couloir-45",
-                    "desc": "une porte secrète à sens unique dans le mur nord ne peut pas être ouverte de ce côté par des moyens conventionels. Vous remarquez également un trou de trois centimètres de diamètre qui la traverse à une hauteur d'un mètre cinquante",
+                    "desc": "une porte secrète à sens unique dans le mur nord qui ne peut pas être ouverte de ce côté par des moyens conventionels. Vous remarquez également un trou de trois centimètres de diamètre qui la traverse à une hauteur d'un mètre cinquante",
                     "hidden": true,
                     "locked": {
                         "key": null,
