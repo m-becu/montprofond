@@ -47,8 +47,8 @@ export class Room {
         if (entity.hasComponent('name') && this.channel) {
             await this.channel.send(`➡ ${entity.components.name.value} est entré.`)
         }
-        if (entity.hasComponent('player') && this.channel) {
-            this.channel.permissionOverwrites.create(entity.components.player.value, { 
+        if (entity.hasComponent('member') && this.channel) {
+            this.channel.permissionOverwrites.create(entity.components.member.value, { 
                 VIEW_CHANNEL: true 
             })
         }
@@ -61,8 +61,8 @@ export class Room {
         if (entity.hasComponent('name') && this.channel) {
             await this.channel.send(`➡ ${entity.components.name.value} est parti.`)
         }
-        if (entity.hasComponent('player') && this.channel) {
-            this.channel.permissionOverwrites.create(entity.components.player.value, { 
+        if (entity.hasComponent('member') && this.channel) {
+            this.channel.permissionOverwrites.create(entity.components.member.value, { 
                 VIEW_CHANNEL: null 
             })
         }
