@@ -8,9 +8,15 @@
  * https://discord.gg/aHmNxt33ZM
  */
 
-import { Guild, Interaction } from "discord.js"
+import { Client, Intents, Collection, Guild, Interaction, Message, Snowflake } from "discord.js"
 import { Room } from "./src/classes/room"
 import { Game, IGameData } from "./src/system"
+
+declare module "discord.js" {
+    export interface Client {
+      commands: Collection<unknown, any>
+    }
+}
 
 // Import config
 require('dotenv').config()
@@ -24,7 +30,6 @@ const { Routes } = require('discord-api-types/v9')
 const rest = new REST({ version: '9' }).setToken(process.env.TOKEN)
 
 // Creating Discord bot
-const { Client, Intents, Collection } = require('discord.js')
 const gandalf = new Client({
     retryLimit: Infinity,
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
@@ -103,14 +108,16 @@ gandalf.on('interactionCreate', async (interaction: Interaction) => {
 
 // Handle channels
 var gameData = require('./src/data/game.json')
-var undermountain: Guild
 var createdChannels: string[] = []
 
 // Login Gandalf to Discord
 gandalf.login(process.env.TOKEN).then(async () => {
-    undermountain = await gandalf.guilds.cache.get(process.env.GUILD_ID)
+
+    if (!process.env.GUILD_ID) return
+    let undermountain = await gandalf.guilds.cache.get(process.env.GUILD_ID)
 
     await gameData.areas.forEach(async (area: IGameData) => {
+        if (!undermountain) return
         let category = await undermountain.channels.create(
             area.displayName,
             { type: 'GUILD_CATEGORY' }
@@ -134,11 +141,30 @@ gandalf.login(process.env.TOKEN).then(async () => {
 
 // Clean node process exit
 process.on('SIGINT', async () => {
-    console.log("💤 Ending game...")
+
+    console.log("💤 Ending game.")
+    if (!process.env.GUILD_ID) return
+    let undermountain = await gandalf.guilds.cache.get(process.env.GUILD_ID)
+
+    console.log("🧹 Clearing DM messages.");
+    Object.values(game.entities).filter(e => e.hasComponent('member')).forEach(async e => {
+        await e.components.member.value.createDM();
+        let dm = await e.components.member.value.user.dmChannel
+        dm.messages.fetch().then(async (messages: Collection<Snowflake, Message>) => {
+            let sentMessages = messages.filter(m => m.author.id === process.env.CLIENT_ID)
+            for (const [k, sent] of sentMessages) {
+                await sent.delete()
+            }
+        }).catch(console.error)
+    })
+
+    console.log("🧹 Clearing channels.");
+    if (!undermountain) return
     for (const channelID of createdChannels) {
         const channel = await undermountain.channels.fetch(channelID)
         if(channel) await channel.delete()
     }
+    
     console.log("👋 Goodbye!")
     process.exit(1)
 })
