@@ -1,4 +1,3 @@
-import { Player } from '../src/classes/player';
 import { Entity, Game, LocationComponent, TableSystem } from '../src/system';
 
 describe('undermountain', () => {
@@ -32,10 +31,14 @@ describe('undermountain', () => {
 
         it('should attribute the right action to the room object', () => {
             let exampleRoom = game.rooms["puit-d-entrée"];
+            let nAction = exampleRoom.actions.length;
 
             expect(exampleRoom.name).toBe("puit-d-entrée");
-            expect(exampleRoom.gameActions[0].run).toBeInstanceOf(Function);
-            expect(typeof exampleRoom.gameActions[0].run()).toBe('string');
+            for (let i=0; i<nAction-1; i++) {
+                expect(exampleRoom.gameActions[i].run).toBeInstanceOf(Function);
+                expect(typeof exampleRoom.gameActions[i].run({ entity })).toBeDefined();
+                expect(typeof exampleRoom.gameActions[i].run({ entity }).desc).toBe('string');
+            }
         });
     });
 

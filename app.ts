@@ -8,7 +8,7 @@
  * https://discord.gg/aHmNxt33ZM
  */
 
-import { Client, Intents, Collection, Guild, Interaction, Message, Snowflake } from "discord.js"
+import { Client, Intents, Collection, Interaction, Message, Snowflake } from "discord.js"
 import { Room } from "./src/classes/room"
 import { Game, IGameData } from "./src/system"
 
@@ -71,7 +71,7 @@ gandalf.on('interactionCreate', async (interaction: Interaction) => {
 
                     if (exit.locked) {
                         await interaction.reply({
-                            content: "Cette porte est verrouillée.",
+                            content: "Cette sortie est bloquée.",
                             ephemeral: true
                         })
                         return
@@ -118,7 +118,7 @@ gandalf.on('interactionCreate', async (interaction: Interaction) => {
 })
 
 // Handle channels
-var gameData = require('./src/data/game.json')
+var gameData = require(process.env.DATA_FOLDER + 'game.json')
 var createdChannels: string[] = []
 
 // Login Gandalf to Discord
