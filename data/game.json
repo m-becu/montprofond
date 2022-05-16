@@ -41,6 +41,12 @@
                     "desc": "Soixante vieux boucliers sont accrochés aux murs; ils se disloquent dès qu'on tente de les manipuler. Le message suivant est inscrit avec du sang sur le mur derrière l'un des boucliers: ",
                     "run": "read|elven|\n\nAu delà de la forêt de piliers, le Mage dément attend,\nEn lançant des sorts derrière les portails magiques",
                     "id": 1
+                },
+                { "name": "Examiner le trou",
+                    "desc": "En regardant à travers le trou, vous remarquez un couloir éclairé de l'autre côté",
+                    "run": "check|detection|20",
+                    "condition": "exit|couloir-45",
+                    "id": 2
                 }
             ],
             "exits": [
@@ -80,15 +86,15 @@
                 },
                 { "name": "Couloir nord",
                     "dest": "couloir-45",
-                    "desc": "un long couloir, au nord de la forêt de piliers"
+                    "desc": "un long couloir au nord de la forêt de piliers"
                 },
                 { "name": "Sortie ouest",
                     "dest": "galerie-des-miroirs",
-                    "desc": "une vollée, à l'ouest de la forêt de piliers"
+                    "desc": "une vollée de marches à l'ouest de la forêt de piliers"
                 },
                 { "name": "Couloir sud",
                     "dest": "site-de-fouille",
-                    "desc": "un long couloir, au sud de la forêt de piliers"
+                    "desc": "un long couloir au sud de la forêt de piliers"
                 }
             ]
         },
