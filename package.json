@@ -2,9 +2,10 @@
   "name": "montprofond",
   "version": "0.1.0",
   "description": "Expérience interactive textuelle basée sur la technologie Discord.",
-  "main": "app.js",
+  "main": "build/app.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "tsc && node ."
   },
   "repository": {
     "type": "git",
@@ -17,9 +18,12 @@
   },
   "homepage": "https://github.com/m-becu/montprofond#readme",
   "devDependencies": {
-    "@types/jest": "^27.5.0",
+    "@types/jest": "^27.5.1",
     "jest": "^28.1.0",
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.16",
+    "ts-jest": "^28.0.2",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.4"
   },
   "dependencies": {
     "@discordjs/builders": "^0.13.0",
