@@ -66,6 +66,17 @@ gandalf.on('interactionCreate', async (interaction: Interaction) => {
             let data = interaction.customId.split('|')
             switch (data[0]) {
                 case 'exit':
+                    let exit = game.players[interaction.user.id].entity.components.location.value.exits.filter((e: IGameData) => e.dest === data[1])[0]
+                    if (!exit) return
+
+                    if (exit.locked) {
+                        await interaction.reply({
+                            content: "Cette porte est verrouillée.",
+                            ephemeral: true
+                        })
+                        return
+                    }
+
                     game.moveEntity(game.players[interaction.user.id].entity, data[1])
                     break
 
