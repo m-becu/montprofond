@@ -1,19 +1,16 @@
-const { Room } = require("../src/classes/room");
-const { Item } = require("../src/classes/item");
-const { Player } = require("../src/classes/player");
-
-const { ECS } = require("../src/system");
+import { Player } from '../src/classes/player';
+import { Entity, Game, LocationComponent, TableSystem } from '../src/system';
 
 describe('undermountain', () => {
 
-    let game;
-    let entity;
+    let game: Game;
+    let entity: Entity;
 
     beforeAll(() => {});
 
     beforeEach(() => {
-        game = new ECS.Game();
-        entity = new ECS.Entity();
+        game = new Game();
+        entity = new Entity();
     });
 
     describe('the entity-component system', () => {
@@ -21,17 +18,12 @@ describe('undermountain', () => {
         it('should create entities with unique ids', () => {
             let entities = [];
             let testArr = [1, 1, 2, 4, 8, 16];
-            let isDuplicateExist = arr => new Set(arr).size !== arr.length;
+            let isDuplicateExist = (arr: any[]) => new Set(arr).size !== arr.length;
             
-            for (i=0;i<10000;i++) { entities.push(new ECS.Entity()) };
+            for (let i=0;i<10000;i++) { entities.push(new Entity()) };
 
             expect(isDuplicateExist(testArr)).toBeTruthy();
             expect(isDuplicateExist(entities)).toBeFalsy();
-        });
-
-        it('should be able to create new players', () => {
-
-            expect(game.newPlayer('Arshavin', {id:0})).toBeInstanceOf(Player);
         });
         
     });
@@ -50,11 +42,11 @@ describe('undermountain', () => {
     describe('the movement system', () => {
 
         it('can move an entity from room to room', async () => {
-            entity.addComponent(new ECS.Components.Location(game.rooms['limbes']));
+            entity.addComponent(new LocationComponent(game.rooms['limbes']));
             
             await game.moveEntity(entity, 'le-portail-béant');
 
-            expect(entity.components.location.room.name).toBe('le-portail-béant');
+            expect(entity.components.location.value.name).toBe('le-portail-béant');
         });
 
     });
@@ -62,12 +54,12 @@ describe('undermountain', () => {
     describe('the tables system', () => {
 
         it('can return a random trinket', () => {
-            let contextTable = new ECS.Systems.Tables(entity, game.rooms['limbes']);
+            let contextTable = new TableSystem();
             let randomTrinkets = [];
             let n = 10000;
             
-            for (i=0;i<n;i++) {
-                let newTrinketItem = contextTable.getTrinket();
+            for (let i=0;i<n;i++) {
+                let newTrinketItem = contextTable.getRandomTrinket();
                 randomTrinkets.push(newTrinketItem);
                 expect(newTrinketItem.name).toBeDefined();
             };

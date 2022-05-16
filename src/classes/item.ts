@@ -1,5 +1,15 @@
-class Item {
-    constructor(entity) {
+import { Entity } from "../system";
+
+export class Item {
+
+    entity: Entity;
+
+    id: string;
+    name: string;
+    desc: string;
+
+    constructor(entity: Entity) {
+
         const { id, components } = entity;
         const { name, desc } = components;
 
@@ -8,7 +18,7 @@ class Item {
         this.id = id;
         this.name = name.value;
         this.desc = desc.value;
-    };
-}
 
-exports.Item = Item;
+    };
+
+};

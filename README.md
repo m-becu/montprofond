@@ -11,7 +11,10 @@ Un utilisateur de Discord peut rejoindre le serveur et obtenir le rôle de joueu
 
 - Créer son personnage
 - Se déplacer de pièce en pièce
-- Parler et intéragir avec les autres entités du donjon (joueurs et NPC)
+
+## ToDo List
+
 - Fouiller une zone à la recherche de secrets, de trésors
 - Ramasser, jeter, examiner, utiliser et équiper des objets
 - Combattre les entités vivant dans le donjon
+- Parler et intéragir avec les autres entités du donjon (joueurs et NPC)
